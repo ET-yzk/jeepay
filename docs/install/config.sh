@@ -6,7 +6,7 @@
 rootDir="/jeepayhomes"
 
 # 【mysql密码】建议更改
-mysql_pwd="jeepaydb123456"
+mysql_pwd="jeepay@mysql"
 
 
 #当前路径， 不要更改参数。

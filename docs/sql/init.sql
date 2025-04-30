@@ -686,21 +686,21 @@ insert into t_sys_entitlement values('ENT_SYS_CONFIG', '系统管理', 'setting'
             insert into t_sys_entitlement values('ENT_UR_ROLE_DEL', '按钮： 删除', 'no-icon', '', '', 'PB', 0, 1,  'ENT_UR_ROLE', '0', 'MCH', now(), now());
 
 -- 默认角色
-insert into t_sys_role values ('ROLE_ADMIN', '系统管理员', 'MGR', '0', '2021-05-01');
-insert into t_sys_role values ('ROLE_OP', '普通操作员', 'MGR', '0', '2021-05-01');
+insert into t_sys_role values ('ROLE_ADMIN', '系统管理员', 'MGR', '0', now());
+insert into t_sys_role values ('ROLE_OP', '普通操作员', 'MGR', '0', now());
 -- 角色权限关联， [超管]用户 拥有所有权限
 -- insert into t_sys_role_ent_rela select '801', ent_id from t_sys_entitlement;
 
--- 超管用户： jeepay / jeepay123
-insert into t_sys_user values (801, 'jeepay', '超管', '13000000001', '1', 'https://jeequan.oss-cn-beijing.aliyuncs.com/jeepay/img/defava_m.png', 'D0001', 1, 1, 'MGR', '0', '2020-06-13', '2020-06-13');
-insert into t_sys_user_auth values (801, '801', '1', 'jeepay', '$2a$10$WKuPJKE1XhX15ibqDM745eOCaZZVUiRitUjEyX6zVNd9k.cQXfzGa', 'testkey', 'MGR');
+-- 超管用户： kfkfka / zkye@pay
+insert into t_sys_user values (801, 'kfkfka', '超管', '13000000001', '0', 'https://blog.yzketx.online/logo.png', 'D0001', 1, 1, 'MGR', '0', now(), now());
+insert into t_sys_user_auth values (801, '801', '1', 'kfkfka', '$2b$12$JvLT3JiFNwIuwQAMCbx07eoNx1vHRThwUCOstYOxs.2X5Ve37LiXG', 'kfkfka@zjut', 'MGR');
 
 -- insert into t_sys_user_role_rela values (801, 801);
 
-INSERT INTO `t_sys_config` VALUES ('mgrSiteUrl', '运营平台网址(不包含结尾/)', '运营平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217', 'text', 0, '2021-5-18 14:46:10');
-INSERT INTO `t_sys_config` VALUES ('mchSiteUrl', '商户平台网址(不包含结尾/)', '商户平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9218', 'text', 0, '2021-5-18 14:46:10');
-INSERT INTO `t_sys_config` VALUES ('paySiteUrl', '支付网关地址(不包含结尾/)', '支付网关地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9216', 'text', 0, '2021-5-18 14:46:10');
-INSERT INTO `t_sys_config` VALUES ('ossPublicSiteUrl', '公共oss访问地址(不包含结尾/)', '公共oss访问地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217/api/anon/localOssFiles', 'text', 0, '2021-5-18 14:46:10');
+INSERT INTO `t_sys_config` VALUES ('mgrSiteUrl', '运营平台网址(不包含结尾/)', '运营平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217', 'text', 0, now());
+INSERT INTO `t_sys_config` VALUES ('mchSiteUrl', '商户平台网址(不包含结尾/)', '商户平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9218', 'text', 0, now());
+INSERT INTO `t_sys_config` VALUES ('paySiteUrl', '支付网关地址(不包含结尾/)', '支付网关地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9216', 'text', 0, now());
+INSERT INTO `t_sys_config` VALUES ('ossPublicSiteUrl', '公共oss访问地址(不包含结尾/)', '公共oss访问地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217/api/anon/localOssFiles', 'text', 0, now());
 
 
 -- 初始化支付方式

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jeequan.jeepay.service.mapper.PrefilledOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.jeequan.jeepay.core.entity.PrefilledOrder">
+        <id column="prefilled_order_id" property="prefilledOrderId" />
+        <result column="mch_no" property="mchNo" />
+        <result column="app_id" property="appId" />
+        <result column="subject" property="subject" />
+        <result column="amount" property="amount" />
+        <result column="currency" property="currency" />
+        <result column="body" property="body" />
+        <result column="remark_config" property="remarkConfig" javaType="com.jeequan.jeepay.core.entity.RemarkConfig" typeHandler="com.jeequan.jeepay.service.handler.RemarkConfigTypeHandler"/>
+        <result column="status" property="status" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="max_usage_count" property="maxUsageCount" />
+        <result column="current_usage_count" property="currentUsageCount" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+</mapper>

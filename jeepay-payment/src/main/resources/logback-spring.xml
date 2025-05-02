@@ -2,7 +2,7 @@
 <configuration scan="false" debug="false">
 
     <!-- 日志存放路径, 读取application.yml 需要使用springProperty获取 -->
-    <springProperty scope="context" name="currentLoggerFilePath" source="logging.path"/>
+    <springProperty scope="context" name="currentLoggerFilePath" source="logging.file.path"/>
 
     <!-- 主日志级别配置  -->
     <springProperty scope="context" name="currentRootLevel" source="logging.level.root"/>

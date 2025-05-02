@@ -95,7 +95,7 @@ logging:
     root: info   #主日志级别
     com.jeequan.jeepay: debug   #该项目日志级别，当需要打印sql时请开启为debug
   file:
-    path: ./logs
+    path: ./logs-dev
 
 #系统业务参数
 isys:

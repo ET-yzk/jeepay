@@ -109,6 +109,10 @@ public class ApiRes<M> implements Serializable {
         return new ApiRes(apiCodeEnum.getCode(), String.format(apiCodeEnum.getMsg(), params), null, null);
     }
 
+    public static <M> ApiRes fail(ApiCodeEnum apiCodeEnum, String msg, M data){
+        return new ApiRes(apiCodeEnum.getCode(), msg, data, null);
+    }
+
     /** 自定义错误信息, 原封不用的返回输入的错误信息 **/
     public static ApiRes customFail(String customMsg){
         return new ApiRes(ApiCodeEnum.CUSTOM_FAIL.getCode(), customMsg, null, null);

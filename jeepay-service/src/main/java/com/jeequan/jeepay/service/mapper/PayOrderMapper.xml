@@ -40,6 +40,7 @@
         <result column="success_time" property="successTime" />
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
+        <result column="source_prefilled_order_id" property="sourcePrefilledOrderId" />
     </resultMap>
 
     <!--交易统计-->

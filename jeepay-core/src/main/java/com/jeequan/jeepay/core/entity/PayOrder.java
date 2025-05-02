@@ -290,4 +290,10 @@ public class PayOrder extends BaseModel implements Serializable {
     @Schema(title = "updatedAt", description = "更新时间")
     private Date updatedAt;
 
+    /**
+     * 关联预填订单ID
+     */
+    @Schema(title = "sourcePrefilledOrderId", description = "关联预填订单ID")
+    private String sourcePrefilledOrderId;
+
 }

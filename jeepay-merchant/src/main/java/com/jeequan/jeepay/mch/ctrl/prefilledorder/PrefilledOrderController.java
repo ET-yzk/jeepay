@@ -75,8 +75,13 @@ public class PrefilledOrderController extends CommonCtrl {
     @PreAuthorize("hasAuthority('ENT_PREFILLED_ORDER_PAYWAY_LIST')")
     @GetMapping("/payWays/{appId}")
     public ApiRes<Set<String>> payWayList(@PathVariable("appId") String appId) {
+        // 1. 校验app是否存在且可用
+        MchApp mchApp = mchAppService.getById(appId);
+        if (mchApp == null || !mchApp.getMchNo().equals(getCurrentMchNo()) || mchApp.getState() != CS.PUB_USABLE) {
+            throw new BizException("商户应用不存在或已禁用");
+        }
 
-        // todo 若app不可用则不返回数据
+        // 2. 查询有效支付方式，返回空：支付方式 未启用/未配置
         Set<String> payWaySet = new HashSet<>();
         mchPayPassageService.list(
                 MchPayPassage.gw().select(MchPayPassage::getWayCode)

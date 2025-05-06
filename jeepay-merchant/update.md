@@ -41,6 +41,7 @@
          -- {"general_enabled": false, "general_required": false, "invoice_enabled": false, "invoice_required": false, "allowed_invoice_types": []}
 
          `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用 (商家可以手动让它失效)',
+         `is_deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 (0-否, 1-是)',
          `start_time` DATETIME DEFAULT NULL COMMENT '生效开始时间 (如果没填，立刻生效)',
          `end_time` DATETIME DEFAULT NULL COMMENT '生效结束时间 (如果没填，就永远有效)',
          `max_usage_count` INT DEFAULT NULL COMMENT '最大成功支付次数 (比如搞活动，前100名有效，null表示不限制)',
@@ -62,6 +63,10 @@
     ALTER TABLE t_pay_order ADD INDEX idx_source_prefilled (source_prefilled_order_id); -- 加个索引方便查询
     ```
 5. 用户无需登陆即可完成订单确认-信息填写-支付订单的流程
+6. 添加预填订单公开支付页URL
+   ```sql
+   INSERT INTO `t_sys_config` VALUES ('prefilledOrderPublicPayUrl', '预填订单公开支付页网址(不包含结尾/)', '预填订单公开支付页网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9215', 'text', 0, now());
+   ```
 
 ### 交互流程
 

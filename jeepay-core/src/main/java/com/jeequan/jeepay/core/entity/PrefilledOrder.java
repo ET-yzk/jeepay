@@ -102,6 +102,13 @@ public class PrefilledOrder extends BaseModel {
     private RemarkConfig remarkConfig;
 
     /**
+     * 逻辑删除标识,1:已删除,0:未删除
+     */
+    @Schema(title = "isDeleted", description = "逻辑删除标识,1:已删除,0:未删除")
+    @ZeroOrOne
+    private Byte isDeleted;
+
+    /**
      * 状态: 0-禁用, 1-启用
      */
     @Schema(title = "status", description = "状态: 0-禁用, 1-启用")

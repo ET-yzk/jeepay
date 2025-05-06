@@ -2,6 +2,7 @@ package com.jeequan.jeepay.mch.ctrl.prefilledorder;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.core.aop.MethodLog;
 import com.jeequan.jeepay.core.constants.ApiCodeEnum;
@@ -21,14 +22,10 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,9 +44,9 @@ import java.util.Set;
 public class PrefilledOrderController extends CommonCtrl {
 
     private final PrefilledOrderService prefilledOrderService;
-    private final PayWayService payWayService;
+    //private final PayWayService payWayService;
     private final MchAppService mchAppService;
-    private final SysConfigService sysConfigService;
+    //private final SysConfigService sysConfigService;
     private final MchPayPassageService mchPayPassageService;
 
     @Autowired
@@ -60,9 +57,9 @@ public class PrefilledOrderController extends CommonCtrl {
             SysConfigService sysConfigService,
             MchPayPassageService mchPayPassageService) {
         this.prefilledOrderService = prefilledOrderService;
-        this.payWayService = payWayService;
+        //this.payWayService = payWayService;
         this.mchAppService = mchAppService;
-        this.sysConfigService = sysConfigService;
+        //this.sysConfigService = sysConfigService;
         this.mchPayPassageService = mchPayPassageService;
     }
 
@@ -118,6 +115,7 @@ public class PrefilledOrderController extends CommonCtrl {
 
         LambdaQueryWrapper<PrefilledOrder> wrapper = PrefilledOrder.gw();
         wrapper.eq(PrefilledOrder::getMchNo, getCurrentMchNo());
+        wrapper.eq(PrefilledOrder::getIsDeleted, CS.IS_NOT_DELETED);
 
         IPage<PrefilledOrder> pages = prefilledOrderService.listByPage(getIPage(), prefilledOrder, paramJSON, wrapper);
 
@@ -191,11 +189,140 @@ public class PrefilledOrderController extends CommonCtrl {
         PrefilledOrder prefilledOrder = prefilledOrderService.getById(prefilledOrderId);
 
         // 校验订单是否存在且属于当前商户
-        if (prefilledOrder == null || !prefilledOrder.getMchNo().equals(getCurrentMchNo())) {
+        if (prefilledOrder == null || !prefilledOrder.getMchNo().equals(getCurrentMchNo()) || prefilledOrder.getIsDeleted() == CS.IS_DELETED) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
         }
 
         return ApiRes.ok(prefilledOrder);
     }
 
+    /**
+     * 修改预填订单
+     */
+    @Operation(summary = "修改预填订单")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "prefilledOrderId", description = "预填订单号", required = true, in = ParameterIn.PATH),
+            @Parameter(name = "subject", description = "订单标题"),
+            @Parameter(name = "body", description = "订单描述信息"),
+            @Parameter(name = "amount", description = "支付金额"),
+            @Parameter(name = "currency", description = "三位货币代码,人民币:cny"),
+            @Parameter(name = "remark_config", description = "备注配置"),
+            @Parameter(name = "status", description = "状态: 0-禁用, 1-启用"),
+            @Parameter(name = "start_time", description = "生效时间"),
+            @Parameter(name = "end_time", description = "失效时间"),
+            @Parameter(name = "max_usage_count", description = "最大成功支付次数")
+    })
+    @PreAuthorize("hasAuthority('ENT_PREFILLED_ORDER_EDIT')")
+    @MethodLog(remark = "修改预填订单")
+    @PutMapping("/{prefilledOrderId}")
+    public ApiRes update(@PathVariable("prefilledOrderId") String prefilledOrderId, @RequestBody PrefilledOrder prefilledOrder) {
+
+        // 1. 校验订单id
+        if (StringUtils.isEmpty(prefilledOrderId)) {
+            return ApiRes.fail(ApiCodeEnum.PARAMS_ERROR, "预填订单号不能为空");
+        }
+
+        // 2. 校验备注业务规则
+        RemarkConfig cfg = prefilledOrder.getRemarkConfig();
+        if (cfg != null) {
+            // 触发业务规则校验
+            try {
+                cfg.validate();
+            } catch (IllegalArgumentException e) {
+                return ApiRes.fail(ApiCodeEnum.PARAMS_ERROR, e.getMessage());
+            }
+        }
+
+        // 3.查询原订单
+        PrefilledOrder dbPrefilledOrder = prefilledOrderService.getById(prefilledOrderId);
+        if (dbPrefilledOrder == null || !dbPrefilledOrder.getMchNo().equals(getCurrentMchNo())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE); // 订单不存在或不属于当前商户
+        }
+
+        // 4. 构建动态更新条件（仅更新非空字段）
+        LambdaUpdateWrapper<PrefilledOrder> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PrefilledOrder::getPrefilledOrderId, prefilledOrderId);
+
+        // 动态添加更新字段
+        if (StringUtils.isNotBlank(prefilledOrder.getAppId())) {
+            updateWrapper.set(PrefilledOrder::getAppId, prefilledOrder.getAppId());
+        }
+        if (StringUtils.isNotBlank(prefilledOrder.getSubject())) {
+            updateWrapper.set(PrefilledOrder::getSubject, prefilledOrder.getSubject());
+        }
+        if (prefilledOrder.getAmount() != null) {
+            updateWrapper.set(PrefilledOrder::getAmount, prefilledOrder.getAmount());
+        }
+        if (StringUtils.isNotBlank(prefilledOrder.getCurrency())) {
+            updateWrapper.set(PrefilledOrder::getCurrency, prefilledOrder.getCurrency());
+        }
+        if (StringUtils.isNotBlank(prefilledOrder.getBody())) {
+            updateWrapper.set(PrefilledOrder::getBody, prefilledOrder.getBody());
+        }
+        if (prefilledOrder.getRemarkConfig() != null) {
+            updateWrapper.set(PrefilledOrder::getRemarkConfig, prefilledOrder.getRemarkConfig());
+        }
+        if (prefilledOrder.getStatus() != null) {
+            updateWrapper.set(PrefilledOrder::getStatus, prefilledOrder.getStatus());
+        }
+        if (prefilledOrder.getStartTime() != null) {
+            updateWrapper.set(PrefilledOrder::getStartTime, prefilledOrder.getStartTime());
+        }
+        if (prefilledOrder.getEndTime() != null) {
+            updateWrapper.set(PrefilledOrder::getEndTime, prefilledOrder.getEndTime());
+        }
+        if (prefilledOrder.getMaxUsageCount() != null) {
+            updateWrapper.set(PrefilledOrder::getMaxUsageCount, prefilledOrder.getMaxUsageCount());
+        }
+
+        // 5. 执行更新
+        boolean updateResult = prefilledOrderService.update(updateWrapper);
+
+        if (!updateResult) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_UPDATE); // 更新失败
+        }
+
+        // todo 是否需要推送修改预填订单消息
+        return ApiRes.ok();
+    }
+
+    /**
+     * 删除预填订单 (逻辑删除)
+     */
+    @Operation(summary = "删除预填订单")
+    @Parameters({
+            @Parameter(name = "iToken", description = "用户身份凭证", required = true, in = ParameterIn.HEADER),
+            @Parameter(name = "prefilledOrderId", description = "预填订单号", required = true, in = ParameterIn.PATH)
+    })
+    @PreAuthorize("hasAuthority('ENT_PREFILLED_ORDER_DEL')")
+    @DeleteMapping("/{prefilledOrderId}")
+    public ApiRes delete(@PathVariable("prefilledOrderId") String prefilledOrderId) {
+        // 校验参数
+        if (StringUtils.isEmpty(prefilledOrderId)) {
+            return ApiRes.fail(ApiCodeEnum.PARAMS_ERROR, "预填订单号不能为空");
+        }
+
+        // 查询订单
+        PrefilledOrder dbPrefilledOrder = prefilledOrderService.getById(prefilledOrderId);
+
+        // 校验订单是否存在且属于当前商户
+        if (dbPrefilledOrder == null || !dbPrefilledOrder.getMchNo().equals(getCurrentMchNo())) {
+            return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
+        // 逻辑删除：更新 is_deleted 字段
+        LambdaUpdateWrapper<PrefilledOrder> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(PrefilledOrder::getPrefilledOrderId, prefilledOrderId)
+                     .eq(PrefilledOrder::getMchNo, getCurrentMchNo())
+                     .set(PrefilledOrder::getIsDeleted, CS.IS_DELETED); // CS.IS_DELETED = 1
+
+        boolean removeResult = prefilledOrderService.update(updateWrapper);
+
+        if (removeResult) {
+            return ApiRes.ok();
+        } else {
+            return ApiRes.fail(ApiCodeEnum.SYSTEM_ERROR, "删除预填订单失败");
+        }
+    }
 }

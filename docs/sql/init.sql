@@ -267,6 +267,7 @@ CREATE TABLE `t_prefilled_order` (
     -- 方式4: 不允许任何备注和发票配置。
     -- {"general_enabled": false, "general_required": false, "invoice_enabled": false, "invoice_required": false, "allowed_invoice_types": []}
 
+    `is_deleted` TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除 (0-否, 1-是)',
     `status` TINYINT NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
     `start_time` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '生效开始时间',
     `end_time` TIMESTAMP DEFAULT NULL COMMENT '生效结束时间',
@@ -745,6 +746,7 @@ INSERT INTO `t_sys_config` VALUES ('mgrSiteUrl', '运营平台网址(不包含�
 INSERT INTO `t_sys_config` VALUES ('mchSiteUrl', '商户平台网址(不包含结尾/)', '商户平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9218', 'text', 0, now());
 INSERT INTO `t_sys_config` VALUES ('paySiteUrl', '支付网关地址(不包含结尾/)', '支付网关地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9216', 'text', 0, now());
 INSERT INTO `t_sys_config` VALUES ('ossPublicSiteUrl', '公共oss访问地址(不包含结尾/)', '公共oss访问地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217/api/anon/localOssFiles', 'text', 0, now());
+INSERT INTO `t_sys_config` VALUES ('prefilledOrderPublicPayUrl', '预填订单公开支付页网址(不包含结尾/)', '预填订单公开支付页网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9215', 'text', 0, now());
 
 
 -- 初始化支付方式

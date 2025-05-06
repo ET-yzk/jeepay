@@ -351,3 +351,6 @@ CREATE TABLE `t_prefilled_order` (
 -- 为支付订单和预填订单添加关联字段
 ALTER TABLE t_pay_order ADD COLUMN source_prefilled_order_id VARCHAR(30) NULL COMMENT '来源预填订单ID';
 ALTER TABLE t_pay_order ADD INDEX idx_source_prefilled (source_prefilled_order_id);
+
+-- 实现预填订单表数据逻辑删除
+ALTER TABLE t_prefilled_order ADD COLUMN is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除标识: 0-未删除, 1-已删除';

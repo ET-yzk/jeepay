@@ -12,6 +12,7 @@
         <result column="currency" property="currency" />
         <result column="body" property="body" />
         <result column="remark_config" property="remarkConfig" javaType="com.jeequan.jeepay.core.entity.RemarkConfig" typeHandler="com.jeequan.jeepay.service.handler.RemarkConfigTypeHandler"/>
+        <result column="is_deleted" property="isDeleted" />
         <result column="status" property="status" />
         <result column="start_time" property="startTime" />
         <result column="end_time" property="endTime" />

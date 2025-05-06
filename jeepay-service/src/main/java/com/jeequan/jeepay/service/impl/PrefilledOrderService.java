@@ -29,11 +29,23 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
      * @return 分页结果
      */
     public IPage<PrefilledOrder> listByPage(IPage iPage, PrefilledOrder prefilledOrder, JSONObject paramJSON, LambdaQueryWrapper<PrefilledOrder> wrapper) {
+        // 指定只查询以下字段
+        wrapper.select(
+            PrefilledOrder::getMchNo,
+            PrefilledOrder::getAppId,
+            PrefilledOrder::getStatus,
+            PrefilledOrder::getSubject,
+            PrefilledOrder::getBody,
+            PrefilledOrder::getStartTime,
+            PrefilledOrder::getEndTime,
+            PrefilledOrder::getRemarkConfig
+        );
+
         if (StringUtils.isNotEmpty((prefilledOrder.getPrefilledOrderId()))) {
             wrapper.eq(PrefilledOrder::getPrefilledOrderId, prefilledOrder.getPrefilledOrderId());
         }
         // 对于商户自己来说，默认只查询自己的数据，因此不需要
-        // 但是要适配超级管理员，因此需要
+        // 但是要适配超级管理员，因此需要对商户号进行过滤
         if (StringUtils.isNotEmpty(prefilledOrder.getMchNo())) {
             wrapper.eq(PrefilledOrder::getMchNo, prefilledOrder.getMchNo());
         }

@@ -3,11 +3,15 @@ package com.jeequan.jeepay.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jeequan.jeepay.core.entity.PrefilledOrder;
 import com.jeequan.jeepay.service.mapper.PrefilledOrderMapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -19,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Service
 public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, PrefilledOrder> {
+
+    private final static Logger logger = LoggerFactory.getLogger(PrefilledOrderService.class);
 
     /**
      * 分页查询预填订单
@@ -82,5 +88,49 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
 
     public String generatePrefilledOrderId(String prefixedOrderId) {
         return prefixedOrderId + "_" + System.currentTimeMillis();
+    }
+
+    /**
+     * 原子性地增加预填订单的使用次数。
+     * 只有在当前使用次数小于最大使用次数，或者最大使用次数未设置（NULL，表示无限）时，才会增加。
+     *
+     * @param prefilledOrderId 预填订单ID
+     * @return 如果成功增加计数，则返回 true；否则返回 false（例如，已达到限制或订单不存在）。
+     */
+    @Transactional // 建议添加事务注解
+    public boolean incrementUsageCountAndCheck(String prefilledOrderId) {
+        if (prefilledOrderId == null) {
+            logger.warn("Attempted to increment usage count with null prefilledOrderId.");
+            return false;
+        }
+
+        LambdaUpdateWrapper<PrefilledOrder> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper
+            .eq(PrefilledOrder::getPrefilledOrderId, prefilledOrderId)
+            // 条件：max_usage_count 为 NULL (无限制) 或者 current_usage_count < max_usage_count
+            .apply("(max_usage_count IS NULL OR current_usage_count < max_usage_count)")
+            .setSql("current_usage_count = current_usage_count + 1");
+
+        boolean updated = this.update(updateWrapper);
+
+        if (updated) {
+            logger.info("Successfully incremented usage count for prefilled order ID: {}", prefilledOrderId);
+        } else {
+            // 查询以确定失败原因（可选，用于更详细的日志）
+            PrefilledOrder order = this.getOne(
+                PrefilledOrder.gw()
+                        .eq(PrefilledOrder::getPrefilledOrderId, prefilledOrderId)
+                        .select(PrefilledOrder::getCurrentUsageCount, PrefilledOrder::getMaxUsageCount)
+            );
+            if (order == null) {
+                logger.warn("Failed to increment usage count: Prefilled order ID {} not found.", prefilledOrderId);
+            } else if (order.getMaxUsageCount() != null && order.getCurrentUsageCount() >= order.getMaxUsageCount()) {
+                logger.warn("Failed to increment usage count for prefilled order ID: {}. Usage limit already reached (current: {}, max: {}).",
+                    prefilledOrderId, order.getCurrentUsageCount(), order.getMaxUsageCount());
+            } else {
+                logger.warn("Failed to increment usage count for prefilled order ID: {}. Unknown reason or condition not met.", prefilledOrderId);
+            }
+        }
+        return updated;
     }
 }

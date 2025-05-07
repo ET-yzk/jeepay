@@ -14,6 +14,7 @@ import com.jeequan.jeepay.core.entity.RemarkConfig;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
+import com.jeequan.jeepay.core.model.DBApplicationConfig; // 确保引入
 import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.service.impl.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +47,7 @@ public class PrefilledOrderController extends CommonCtrl {
     private final PrefilledOrderService prefilledOrderService;
     //private final PayWayService payWayService;
     private final MchAppService mchAppService;
-    //private final SysConfigService sysConfigService;
+    private final SysConfigService sysConfigService;
     private final MchPayPassageService mchPayPassageService;
 
     @Autowired
@@ -59,7 +60,7 @@ public class PrefilledOrderController extends CommonCtrl {
         this.prefilledOrderService = prefilledOrderService;
         //this.payWayService = payWayService;
         this.mchAppService = mchAppService;
-        //this.sysConfigService = sysConfigService;
+        this.sysConfigService = sysConfigService;
         this.mchPayPassageService = mchPayPassageService;
     }
 
@@ -118,6 +119,18 @@ public class PrefilledOrderController extends CommonCtrl {
         wrapper.eq(PrefilledOrder::getIsDeleted, CS.IS_NOT_DELETED);
 
         IPage<PrefilledOrder> pages = prefilledOrderService.listByPage(getIPage(), prefilledOrder, paramJSON, wrapper);
+
+        // 获取商户站点URL，用于拼接支付页地址
+        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+        String prefilledOrderPublicPaySiteUrl = dbApplicationConfig.getPrefilledOrderPublicPaySiteUrl();
+
+        if (pages != null && pages.getRecords() != null) {
+            for (PrefilledOrder order : pages.getRecords()) {
+                if (StringUtils.isNotEmpty(order.getPrefilledOrderId())) {
+                    order.setPublicPayUrl(prefilledOrderPublicPaySiteUrl + "/prefilledOrder/publicPay/" + order.getPrefilledOrderId());
+                }
+            }
+        }
 
         return ApiPageRes.pages(pages);
     }
@@ -191,6 +204,14 @@ public class PrefilledOrderController extends CommonCtrl {
         // 校验订单是否存在且属于当前商户
         if (prefilledOrder == null || !prefilledOrder.getMchNo().equals(getCurrentMchNo()) || prefilledOrder.getIsDeleted() == CS.IS_DELETED) {
             return ApiRes.fail(ApiCodeEnum.SYS_OPERATION_FAIL_SELETE);
+        }
+
+        // 获取商户站点URL，用于拼接支付页地址
+        DBApplicationConfig dbApplicationConfig = sysConfigService.getDBApplicationConfig();
+        String prefilledOrderPublicPaySiteUrl = dbApplicationConfig.getPrefilledOrderPublicPaySiteUrl();
+
+        if (StringUtils.isNotEmpty(prefilledOrder.getPrefilledOrderId())) {
+            prefilledOrder.setPublicPayUrl(prefilledOrderPublicPaySiteUrl + "/prefilledOrder/publicPay/" + prefilledOrder.getPrefilledOrderId());
         }
 
         return ApiRes.ok(prefilledOrder);

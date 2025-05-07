@@ -161,4 +161,10 @@ public class PrefilledOrder extends BaseModel {
         }
         return startTime.before(endTime);
     }
+
+    /**
+     * 公开支付页地址 (非数据库字段)
+     */
+    @TableField(exist = false)
+    private String publicPayUrl;
 }

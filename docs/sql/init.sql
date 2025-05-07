@@ -746,7 +746,7 @@ INSERT INTO `t_sys_config` VALUES ('mgrSiteUrl', '运营平台网址(不包含�
 INSERT INTO `t_sys_config` VALUES ('mchSiteUrl', '商户平台网址(不包含结尾/)', '商户平台网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9218', 'text', 0, now());
 INSERT INTO `t_sys_config` VALUES ('paySiteUrl', '支付网关地址(不包含结尾/)', '支付网关地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9216', 'text', 0, now());
 INSERT INTO `t_sys_config` VALUES ('ossPublicSiteUrl', '公共oss访问地址(不包含结尾/)', '公共oss访问地址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9217/api/anon/localOssFiles', 'text', 0, now());
-INSERT INTO `t_sys_config` VALUES ('prefilledOrderPublicPayUrl', '预填订单公开支付页网址(不包含结尾/)', '预填订单公开支付页网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9215', 'text', 0, now());
+INSERT INTO `t_sys_config` VALUES ('prefilledOrderPublicPaySiteUrl', '预填订单公开支付页网址(不包含结尾/)', '预填订单公开支付页网址(不包含结尾/)', 'applicationConfig', '系统应用配置', 'http://127.0.0.1:9215', 'text', 0, now());
 
 
 -- 初始化支付方式

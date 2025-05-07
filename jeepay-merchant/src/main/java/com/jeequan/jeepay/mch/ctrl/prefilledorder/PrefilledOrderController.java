@@ -128,6 +128,8 @@ public class PrefilledOrderController extends CommonCtrl {
             for (PrefilledOrder order : pages.getRecords()) {
                 if (StringUtils.isNotEmpty(order.getPrefilledOrderId())) {
                     order.setPublicPayUrl(prefilledOrderPublicPaySiteUrl + "/prefilledOrder/publicPay/" + order.getPrefilledOrderId());
+                    // 对商户不显示逻辑删除标记
+                    order.setIsDeleted(null);
                 }
             }
         }
@@ -213,6 +215,9 @@ public class PrefilledOrderController extends CommonCtrl {
         if (StringUtils.isNotEmpty(prefilledOrder.getPrefilledOrderId())) {
             prefilledOrder.setPublicPayUrl(prefilledOrderPublicPaySiteUrl + "/prefilledOrder/publicPay/" + prefilledOrder.getPrefilledOrderId());
         }
+
+        // 对商户不显示逻辑删除标记
+        prefilledOrder.setIsDeleted(null);
 
         return ApiRes.ok(prefilledOrder);
     }

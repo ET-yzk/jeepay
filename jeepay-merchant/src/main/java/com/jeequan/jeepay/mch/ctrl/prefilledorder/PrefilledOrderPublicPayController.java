@@ -80,6 +80,9 @@ public class PrefilledOrderPublicPayController extends CommonCtrl {
             throw new BizException("预填订单已达到最大使用次数");
         }
 
+        // 对商户不显示逻辑删除标记
+        prefilledOrder.setIsDeleted(null);
+
         return ApiRes.ok(prefilledOrder);
     }
 

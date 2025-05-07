@@ -1,4 +1,4 @@
-package com.jeequan.jeepay.service.handler;
+package com.jeequan.jeepay.core.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.jeequan.jeepay.core.entity.RemarkConfig;

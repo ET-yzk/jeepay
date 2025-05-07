@@ -9,8 +9,8 @@ import java.io.Serial;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
 import com.jeequan.jeepay.core.annotation.ZeroOrOne;
+import com.jeequan.jeepay.core.handler.RemarkConfigTypeHandler;
 import com.jeequan.jeepay.core.model.BaseModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -98,7 +98,7 @@ public class PrefilledOrder extends BaseModel {
      */
     @Schema(title = "remarkConfig", description = "备注配置")
     @Valid
-    @TableField(value = "remark_config", typeHandler = FastjsonTypeHandler.class)
+    @TableField(value = "remark_config", typeHandler = RemarkConfigTypeHandler.class)
     private RemarkConfig remarkConfig;
 
     /**

@@ -37,14 +37,15 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
     public IPage<PrefilledOrder> listByPage(IPage iPage, PrefilledOrder prefilledOrder, JSONObject paramJSON, LambdaQueryWrapper<PrefilledOrder> wrapper) {
         // 指定只查询以下字段
         wrapper.select(
-            PrefilledOrder::getMchNo,
-            PrefilledOrder::getAppId,
+            PrefilledOrder::getPrefilledOrderId,
+            PrefilledOrder::getAmount,
             PrefilledOrder::getStatus,
             PrefilledOrder::getSubject,
-            PrefilledOrder::getBody,
             PrefilledOrder::getStartTime,
             PrefilledOrder::getEndTime,
-            PrefilledOrder::getRemarkConfig
+            PrefilledOrder::getRemarkConfig,
+            PrefilledOrder::getCurrentUsageCount,
+            PrefilledOrder::getMaxUsageCount
         );
 
         if (StringUtils.isNotEmpty((prefilledOrder.getPrefilledOrderId()))) {

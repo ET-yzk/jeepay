@@ -1,6 +1,6 @@
 package com.jeequan.jeepay.core.entity;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -155,6 +155,7 @@ public class PrefilledOrder extends BaseModel {
     private Date updatedAt;
 
     @AssertTrue(message = "生效时间必须早于失效时间")
+    @JSONField(serialize = false) // 禁用该字段的序列化
     public boolean isStartTimeBeforeEndTime() {
         if (startTime == null || endTime == null) {
             return true;

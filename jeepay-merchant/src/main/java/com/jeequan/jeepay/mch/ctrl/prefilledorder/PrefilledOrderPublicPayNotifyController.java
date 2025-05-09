@@ -27,7 +27,7 @@ import java.io.IOException;
  * @see <a href=""></a>
  * @since 2025/5/7
  */
-@Tag(name = "预填订单公开支付页")
+@Tag(name = "用户侧预填订单类")
 @RestController
 @RequestMapping("/api/anon/prefilledOrder/notify")
 public class PrefilledOrderPublicPayNotifyController extends CommonCtrl {

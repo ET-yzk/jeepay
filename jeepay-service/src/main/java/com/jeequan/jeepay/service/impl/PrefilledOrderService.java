@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.PrefilledOrder;
 import com.jeequan.jeepay.service.mapper.PrefilledOrderMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 /**
  * <p>
@@ -25,6 +28,34 @@ import org.springframework.transaction.annotation.Transactional;
 public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, PrefilledOrder> {
 
     private final static Logger logger = LoggerFactory.getLogger(PrefilledOrderService.class);
+
+    /**
+     * 公开分页查询预填订单
+     * @param iPage 分页参数
+     * @param wrapper mybatis-plus 查询条件构造器
+     * @return 分页结果
+     */
+    public IPage<PrefilledOrder> annoListByPage(IPage iPage, LambdaQueryWrapper<PrefilledOrder> wrapper) {
+        // 指定只查询以下字段
+        wrapper.select(
+            PrefilledOrder::getPrefilledOrderId,
+            PrefilledOrder::getAmount,
+            PrefilledOrder::getSubject,
+            PrefilledOrder::getBody,
+            PrefilledOrder::getStartTime,
+            PrefilledOrder::getEndTime
+        );
+
+        Date utc_date = new Date();
+        wrapper.eq(PrefilledOrder::getStatus, CS.PUB_USABLE) // 启用状态
+                .and(w -> w.le(PrefilledOrder::getStartTime, utc_date).or().isNull(PrefilledOrder::getStartTime))// 开始时间小于等于当前时间或为空
+                .and(w -> w.ge(PrefilledOrder::getEndTime, utc_date).or().isNull(PrefilledOrder::getEndTime)); // 结束时间大于等于当前时间或为空
+
+        // 按创建时间倒序排列
+        wrapper.orderByDesc(PrefilledOrder::getCreatedAt);
+
+        return page(iPage, wrapper);
+    }
 
     /**
      * 分页查询预填订单
@@ -70,10 +101,14 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
         }
         if (paramJSON != null) {
             if (StringUtils.isNotEmpty(paramJSON.getString("usageStart"))) {
-                wrapper.ge(PrefilledOrder::getStartTime, paramJSON.getString("usageStart"));
+                wrapper.and(w -> w.ge(PrefilledOrder::getStartTime, paramJSON.getString("usageStart"))
+                        .or()
+                        .isNull(PrefilledOrder::getStartTime));
             }
             if (StringUtils.isNotEmpty(paramJSON.getString("usageEnd"))) {
-                wrapper.le(PrefilledOrder::getEndTime, paramJSON.getString("usageEnd"));
+                wrapper.and(w -> w.le(PrefilledOrder::getEndTime, paramJSON.getString("usageEnd"))
+                        .or()
+                        .isNull(PrefilledOrder::getEndTime));
             }
         }
 

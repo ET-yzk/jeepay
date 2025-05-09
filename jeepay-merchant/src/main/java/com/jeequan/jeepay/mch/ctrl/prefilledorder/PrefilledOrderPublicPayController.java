@@ -1,12 +1,15 @@
 package com.jeequan.jeepay.mch.ctrl.prefilledorder;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
 import com.jeequan.jeepay.core.entity.PrefilledOrder;
 import com.jeequan.jeepay.core.exception.BizException;
+import com.jeequan.jeepay.core.model.ApiPageRes;
 import com.jeequan.jeepay.core.model.ApiRes;
 import com.jeequan.jeepay.core.model.DBApplicationConfig;
 import com.jeequan.jeepay.exception.JeepayException;
@@ -26,26 +29,37 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
- * 预填订单公开支付页控制器
+ * 用户侧预填订单控制器
  *
  * @author zkye
  * @version 1.0
  * @since 2025/5/6
  */
-@Tag(name = "预填订单公开支付页")
+@Tag(name = "用户侧预填订单类")
 @RestController
-@RequestMapping("/api/anon/prefilledOrder/publicPay")
+@RequestMapping("/api/anon/prefilledOrder")
 public class PrefilledOrderPublicPayController extends CommonCtrl {
 
     @Autowired private PrefilledOrderService prefilledOrderService;
     @Autowired private MchAppService mchAppService;
     @Autowired private MchPayPassageService mchPayPassageService;
     @Autowired private SysConfigService sysConfigService;
+
+    /** 查询有效预填订单列表 **/
+    @Operation(summary = "查询有效预填订单列表")
+    @GetMapping
+    public ApiRes list() {
+        // 构建查询条件
+        LambdaQueryWrapper<PrefilledOrder> queryWrapper = PrefilledOrder.gw();
+
+        // 查询数据
+        IPage<PrefilledOrder> resultPage = prefilledOrderService.annoListByPage(getIPage(), queryWrapper);
+
+        return ApiPageRes.pages(resultPage);
+    }
 
     /** 查询预填订单信息 **/
     @Operation(summary = "查询预填订单信息")

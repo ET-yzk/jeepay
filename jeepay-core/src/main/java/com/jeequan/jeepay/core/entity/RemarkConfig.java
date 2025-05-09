@@ -48,8 +48,6 @@ public class RemarkConfig {
     /**
      * 支持的发票类型（"personal","corporate"）
      */
-    @NotNull
-    @NotEmpty
     private List<@Pattern(regexp = "personal|corporate", message = "可选的类型为：personal、corporate") String> allowedInvoiceTypes;
 
     /**

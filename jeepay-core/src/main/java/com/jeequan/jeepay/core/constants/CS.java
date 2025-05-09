@@ -56,6 +56,12 @@ public class CS {
     }
 
     /**
+     * 逻辑删除标识: 0-否，1-是
+     */
+    public static final byte IS_DELETED = 1;
+    public static final byte IS_NOT_DELETED = 0;
+
+    /**
      * 账号类型:1-服务商 2-商户 3-商户应用
      */
     public static final byte INFO_TYPE_ISV = 1;

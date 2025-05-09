@@ -96,7 +96,8 @@ public class SysConfigController extends CommonCtrl {
 			@Parameter(name = "mchSiteUrl", description = "商户平台网址(不包含结尾/)"),
 			@Parameter(name = "mgrSiteUrl", description = "运营平台网址(不包含结尾/)"),
 			@Parameter(name = "ossPublicSiteUrl", description = "公共oss访问地址(不包含结尾/)"),
-			@Parameter(name = "paySiteUrl", description = "支付网关地址(不包含结尾/)")
+			@Parameter(name = "paySiteUrl", description = "支付网关地址(不包含结尾/)"),
+			@Parameter(name = "prefilledOrderPublicPaySiteUrl", description = "预填订单公开支付页地址(不包含结尾/)")
 	})
 	@PreAuthorize("hasAuthority('ENT_SYS_CONFIG_EDIT')")
 	@MethodLog(remark = "系统配置修改")

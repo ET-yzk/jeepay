@@ -1,6 +1,6 @@
 package com.jeequan.jeepay.core.entity;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -9,8 +9,8 @@ import java.io.Serial;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.handlers.FastjsonTypeHandler;
 import com.jeequan.jeepay.core.annotation.ZeroOrOne;
+import com.jeequan.jeepay.core.handler.RemarkConfigTypeHandler;
 import com.jeequan.jeepay.core.model.BaseModel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -98,8 +98,15 @@ public class PrefilledOrder extends BaseModel {
      */
     @Schema(title = "remarkConfig", description = "备注配置")
     @Valid
-    @TableField(value = "remark_config", typeHandler = FastjsonTypeHandler.class)
+    @TableField(value = "remark_config", typeHandler = RemarkConfigTypeHandler.class)
     private RemarkConfig remarkConfig;
+
+    /**
+     * 逻辑删除标识,1:已删除,0:未删除
+     */
+    @Schema(title = "isDeleted", description = "逻辑删除标识,1:已删除,0:未删除")
+    @ZeroOrOne
+    private Byte isDeleted;
 
     /**
      * 状态: 0-禁用, 1-启用
@@ -148,10 +155,17 @@ public class PrefilledOrder extends BaseModel {
     private Date updatedAt;
 
     @AssertTrue(message = "生效时间必须早于失效时间")
+    @JSONField(serialize = false) // 禁用该字段的序列化
     public boolean isStartTimeBeforeEndTime() {
         if (startTime == null || endTime == null) {
             return true;
         }
         return startTime.before(endTime);
     }
+
+    /**
+     * 公开支付页地址 (非数据库字段)
+     */
+    @TableField(exist = false)
+    private String publicPayUrl;
 }

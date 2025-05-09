@@ -45,6 +45,9 @@ public class DBApplicationConfig implements Serializable {
     /** oss公共读文件地址 **/
     private String ossPublicSiteUrl;
 
+    /** 预填订单公开支付页地址 **/
+    private String prefilledOrderPublicPaySiteUrl;
+
     /** 生成  【jsapi统一收银台跳转地址】 **/
     public String genUniJsapiPayUrl(Byte type, String id){
         return getPaySiteUrl() + "/cashier/index.html#/hub/" + genQrToken(type, id);

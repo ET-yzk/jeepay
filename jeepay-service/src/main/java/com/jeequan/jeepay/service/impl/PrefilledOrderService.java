@@ -76,7 +76,8 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
             PrefilledOrder::getEndTime,
             PrefilledOrder::getRemarkConfig,
             PrefilledOrder::getCurrentUsageCount,
-            PrefilledOrder::getMaxUsageCount
+            PrefilledOrder::getMaxUsageCount,
+            PrefilledOrder::getOverSoldCount
         );
 
         if (StringUtils.isNotEmpty((prefilledOrder.getPrefilledOrderId()))) {
@@ -169,6 +170,14 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
             } else if (order.getMaxUsageCount() != null && order.getCurrentUsageCount() >= order.getMaxUsageCount()) {
                 logger.warn("Failed to increment usage count for prefilled order ID: {}. Usage limit already reached (current: {}, max: {}).",
                     prefilledOrderId, order.getCurrentUsageCount(), order.getMaxUsageCount());
+
+                // 原子性增加 overSoldCount
+                LambdaUpdateWrapper<PrefilledOrder> overSellWrapper = new LambdaUpdateWrapper<>();
+                overSellWrapper
+                        .eq(PrefilledOrder::getPrefilledOrderId, prefilledOrderId)
+                        .setSql("`over_sold_count` = `over_sold_count` + 1");
+
+                updated = this.update(overSellWrapper);
             } else {
                 logger.warn("Failed to increment usage count for prefilled order ID: {}. Unknown reason or condition not met.", prefilledOrderId);
             }

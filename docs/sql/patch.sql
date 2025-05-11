@@ -354,3 +354,6 @@ ALTER TABLE t_pay_order ADD INDEX idx_source_prefilled (source_prefilled_order_i
 
 -- 实现预填订单表数据逻辑删除
 ALTER TABLE t_prefilled_order ADD COLUMN is_deleted TINYINT NOT NULL DEFAULT 0 COMMENT '逻辑删除标识: 0-未删除, 1-已删除';
+
+-- 添加预填订单表超卖字段
+ALTER TABLE t_prefilled_order ADD COLUMN over_sold_count INT NOT NULL DEFAULT 0 COMMENT '超卖计数器：表示尝试使用时已达到上限的次数' AFTER current_usage_count;

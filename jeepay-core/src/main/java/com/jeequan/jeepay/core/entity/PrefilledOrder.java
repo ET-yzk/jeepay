@@ -168,4 +168,9 @@ public class PrefilledOrder extends BaseModel {
      */
     @TableField(exist = false)
     private String publicPayUrl;
+
+    /**
+     * 超卖计数器：表示尝试使用时已达到上限的次数
+     */
+    private Integer overSoldCount;
 }

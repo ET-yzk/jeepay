@@ -18,6 +18,7 @@
         <result column="end_time" property="endTime" />
         <result column="max_usage_count" property="maxUsageCount" />
         <result column="current_usage_count" property="currentUsageCount" />
+        <result column="over_sold_count" property="overSoldCount" />
         <result column="created_at" property="createdAt" />
         <result column="updated_at" property="updatedAt" />
     </resultMap>

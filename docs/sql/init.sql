@@ -273,6 +273,7 @@ CREATE TABLE `t_prefilled_order` (
     `end_time` TIMESTAMP DEFAULT NULL COMMENT '生效结束时间',
     `max_usage_count` INT DEFAULT NULL COMMENT '最大成功支付次数',
     `current_usage_count` INT NOT NULL DEFAULT 0 COMMENT '当前成功支付次数',
+    `over_sold_count` INT NOT NULL DEFAULT 0 COMMENT '超卖计数器：表示尝试使用时已达到上限的次数', -- 新增字段
 
     `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
     `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',

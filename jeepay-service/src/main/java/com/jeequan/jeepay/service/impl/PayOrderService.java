@@ -400,6 +400,10 @@ public class PayOrderService extends ServiceImpl<PayOrderMapper, PayOrder> {
      * @return
      */
     public IPage<PayOrder> listByPage(IPage iPage, PayOrder payOrder, JSONObject paramJSON, LambdaQueryWrapper<PayOrder> wrapper) {
+
+        if (StringUtils.isNotEmpty(payOrder.getSourcePrefilledOrderId())) {
+            wrapper.eq(PayOrder::getSourcePrefilledOrderId, payOrder.getSourcePrefilledOrderId());
+        }
         if (StringUtils.isNotEmpty(payOrder.getPayOrderId())) {
             wrapper.eq(PayOrder::getPayOrderId, payOrder.getPayOrderId());
         }

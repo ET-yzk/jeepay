@@ -110,6 +110,12 @@ public class PrefilledOrderService extends ServiceImpl<PrefilledOrderMapper, Pre
                         .or()
                         .isNull(PrefilledOrder::getEndTime));
             }
+
+            if (StringUtils.isNotEmpty(paramJSON.getString("description"))) {
+                wrapper.and(w -> w.like(PrefilledOrder::getSubject, paramJSON.getString("description"))
+                        .or()
+                        .like(PrefilledOrder::getBody, paramJSON.getString("description")));
+            }
         }
 
         // 按创建时间倒序排列

@@ -44,7 +44,7 @@ public class PrefilledOrderPublicPayNotifyController extends CommonCtrl {
             @Parameter(name = "state", description = "支付状态", required = true),
             @Parameter(name = "errCode", description = "错误代码"),
             @Parameter(name = "errMsg", description = "错误信息"),
-            @Parameter(name = "channelExtra", description = "渠道扩展参数，应包含 sourcePrefilledOrderId") 
+            @Parameter(name = "extParam", description = "扩展参数，应包含 sourcePrefilledOrderId")
     })
     @RequestMapping("/payOrder")
     public void payOrderNotify() throws IOException {
@@ -79,14 +79,15 @@ public class PrefilledOrderPublicPayNotifyController extends CommonCtrl {
         if (PayOrder.STATE_SUCCESS == paymentState) { // 仅在支付成功时处理
             logger.info("预填订单支付成功, payOrderId: {}", payOrderId);
             String sourcePrefilledOrderId = null;
-            String channelExtraStr = params.getString("channelExtra");
+//            String channelExtraStr = params.getString("channelExtra");
+            String extParam = params.getString("extParam");
 
-            if (StringUtils.isNotEmpty(channelExtraStr)) {
+            if (StringUtils.isNotEmpty(extParam)) {
                 try {
-                    JSONObject extraJson = JSONObject.parseObject(channelExtraStr);
+                    JSONObject extraJson = JSONObject.parseObject(extParam);
                     sourcePrefilledOrderId = extraJson.getString("sourcePrefilledOrderId");
                 } catch (Exception e) {
-                    logger.error("解析 channelExtra 出错, channelExtra: {}, payOrderId: {}", channelExtraStr, payOrderId, e);
+                    logger.error("解析 extParam 出错, extParam: {}, payOrderId: {}", extParam, payOrderId, e);
                 }
             }
 
@@ -100,7 +101,7 @@ public class PrefilledOrderPublicPayNotifyController extends CommonCtrl {
                     // 此处可能需要根据业务需求进行额外处理，例如发出警告通知等
                 }
             } else {
-                logger.error("支付回调中未能获取 sourcePrefilledOrderId, 无法更新预填订单使用次数. payOrderId: {}, channelExtra: {}", payOrderId, channelExtraStr);
+                logger.error("支付回调中未能获取 sourcePrefilledOrderId, 无法更新预填订单使用次数. payOrderId: {}, extParam: {}", payOrderId, extParam);
                 // 这是一个严重问题，需要排查为何 sourcePrefilledOrderId 未能传递到回调
             }
         } else {

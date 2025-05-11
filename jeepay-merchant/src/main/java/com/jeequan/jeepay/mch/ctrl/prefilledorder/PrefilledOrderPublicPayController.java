@@ -7,6 +7,7 @@ import com.jeequan.jeepay.JeepayClient;
 import com.jeequan.jeepay.core.constants.CS;
 import com.jeequan.jeepay.core.entity.MchApp;
 import com.jeequan.jeepay.core.entity.MchPayPassage;
+import com.jeequan.jeepay.core.entity.PayOrder;
 import com.jeequan.jeepay.core.entity.PrefilledOrder;
 import com.jeequan.jeepay.core.exception.BizException;
 import com.jeequan.jeepay.core.model.ApiPageRes;
@@ -17,10 +18,7 @@ import com.jeequan.jeepay.mch.ctrl.CommonCtrl;
 import com.jeequan.jeepay.model.PayOrderCreateReqModel;
 import com.jeequan.jeepay.request.PayOrderCreateRequest;
 import com.jeequan.jeepay.response.PayOrderCreateResponse;
-import com.jeequan.jeepay.service.impl.MchAppService;
-import com.jeequan.jeepay.service.impl.MchPayPassageService;
-import com.jeequan.jeepay.service.impl.PrefilledOrderService;
-import com.jeequan.jeepay.service.impl.SysConfigService;
+import com.jeequan.jeepay.service.impl.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -43,10 +41,24 @@ import java.util.*;
 @RequestMapping("/api/anon/prefilledOrder")
 public class PrefilledOrderPublicPayController extends CommonCtrl {
 
-    @Autowired private PrefilledOrderService prefilledOrderService;
-    @Autowired private MchAppService mchAppService;
-    @Autowired private MchPayPassageService mchPayPassageService;
-    @Autowired private SysConfigService sysConfigService;
+    final private PrefilledOrderService prefilledOrderService;
+    final private MchAppService mchAppService;
+    final private MchPayPassageService mchPayPassageService;
+    final private SysConfigService sysConfigService;
+    final private PayOrderService payOrderService;
+
+    @Autowired
+    public PrefilledOrderPublicPayController(PrefilledOrderService prefilledOrderService,
+                                             MchAppService mchAppService,
+                                             MchPayPassageService mchPayPassageService,
+                                             SysConfigService sysConfigService,
+                                             PayOrderService payOrderService) {
+        this.prefilledOrderService = prefilledOrderService;
+        this.mchAppService = mchAppService;
+        this.mchPayPassageService = mchPayPassageService;
+        this.sysConfigService = sysConfigService;
+        this.payOrderService = payOrderService;
+    }
 
     /** 查询有效预填订单列表 **/
     @Operation(summary = "查询有效预填订单列表")
@@ -94,7 +106,7 @@ public class PrefilledOrderPublicPayController extends CommonCtrl {
             throw new BizException("预填订单已达到最大使用次数");
         }
 
-        // 对商户不显示逻辑删除标记
+        // 对用户不显示逻辑删除标记
         prefilledOrder.setIsDeleted(null);
 
         return ApiRes.ok(prefilledOrder);
@@ -140,6 +152,7 @@ public class PrefilledOrderPublicPayController extends CommonCtrl {
         String generalRemark = getValString("generalRemark");
         String invoiceRemark = getValString("invoiceRemark");
         String payDataType = getValString("payDataType");
+        String authCode = getValString("authCode");
 
         // 2. 查询预填订单
         PrefilledOrder prefilledOrder = prefilledOrderService.getById(prefilledOrderId);
@@ -208,15 +221,25 @@ public class PrefilledOrderPublicPayController extends CommonCtrl {
 
         // 设置扩展参数
         JSONObject extParams = new JSONObject();
-        if(StringUtils.isNotEmpty(generalRemark)) {
+        if(prefilledOrder.getRemarkConfig().getGeneralEnabled() && StringUtils.isNotEmpty(generalRemark)) {
             extParams.put("generalRemark", generalRemark.trim());
         }
-        if(StringUtils.isNotEmpty(invoiceRemark)) {
+        if(prefilledOrder.getRemarkConfig().getInvoiceEnabled() && StringUtils.isNotEmpty(invoiceRemark)) {
             extParams.put("invoiceRemark", invoiceRemark.trim());
         }
         // 记录来源预填订单ID
         extParams.put("sourcePrefilledOrderId", prefilledOrderId);
-        model.setChannelExtra(extParams.toString());
+        model.setExtParam(extParams.toString());
+
+        //设置渠道参数
+        JSONObject channelParams = new JSONObject();
+        if(StringUtils.isNotEmpty(payDataType)) {
+            channelParams.put("payDataType", payDataType.trim());
+        }
+        if(StringUtils.isNotEmpty(authCode)) {
+            channelParams.put("authCode", authCode.trim());
+        }
+        model.setChannelExtra(channelParams.toString());
 
         // 9. 调用支付接口
         JeepayClient jeepayClient = new JeepayClient(dbApplicationConfig.getPaySiteUrl(), mchApp.getAppSecret());
@@ -225,6 +248,9 @@ public class PrefilledOrderPublicPayController extends CommonCtrl {
             if(response.getCode() != 0){
                 throw new BizException(response.getMsg());
             }
+            PayOrder payOrder = payOrderService.getById(response.get().getPayOrderId());
+            payOrder.setSourcePrefilledOrderId(prefilledOrderId);
+            payOrderService.updateById(payOrder);
             return ApiRes.ok(response.get());
         } catch (JeepayException e) {
             throw new BizException(e.getMessage());

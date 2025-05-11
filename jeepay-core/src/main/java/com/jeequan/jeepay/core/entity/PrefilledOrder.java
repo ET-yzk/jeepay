@@ -91,6 +91,7 @@ public class PrefilledOrder extends BaseModel {
      */
     @Schema(title = "body", description = "订单描述信息")
     @Size(max = 256, message = "描述信息长度不能超过256字符")
+    @NotBlank(message = "订单描述信息不能为空")
     private String body;
 
     /**

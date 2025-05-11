@@ -315,7 +315,7 @@ CREATE TABLE `t_pay_order` (
         `division_last_time` DATETIME COMMENT '最新分账时间',
         `err_code` VARCHAR(128) DEFAULT NULL COMMENT '渠道支付错误码',
         `err_msg` VARCHAR(256) DEFAULT NULL COMMENT '渠道支付错误描述',
-        `ext_param` VARCHAR(128) DEFAULT NULL COMMENT '商户扩展参数',
+        `ext_param` VARCHAR(512) DEFAULT NULL COMMENT '商户扩展参数',
         `notify_url` VARCHAR(128) NOT NULL default '' COMMENT '异步通知地址',
         `return_url` VARCHAR(128) DEFAULT '' COMMENT '页面跳转地址',
         `expired_time` DATETIME DEFAULT NULL COMMENT '订单失效时间',

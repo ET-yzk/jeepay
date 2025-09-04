@@ -1,6 +1,8 @@
 
 文件夹用途： 用于放置开发环境的通用配置项和生产环境下的项目配置模板。 
 
+0. 该文件夹下的 【dev.jvm.conf】 和 【docker-compose.yml】 文件为 2核 2G 资源下的部署方案
+
 1. 【devCommons】： 
 开发环境通用配置文件放置目录。 更改此目录后将覆写 manager/merchant/payment 项目下的application.yml文件对应参数，从而达到每个项目不必单独配置的目的，更加节约开发时间。
 
